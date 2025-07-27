@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Lesson Planner for Teachers | Google Hackathon</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --google-blue: #4285F4;
+            --google-red: #EA4335;
+            --google-yellow: #FBBC05;
+            --google-green: #34A853;
+            --google-gray: #5F6368;
+            --google-light-gray: #F1F3F4;
+            --google-dark-gray: #3C4043;
+            --google-white: #FFFFFF;
+            --google-black: #202124;
+            --google-surface: #FFFFFF;
+            --google-primary: #4285F4;
+            --google-secondary: #34A853;
+        }
+
+        body {
+            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: var(--google-dark-gray);
+            min-height: 100vh;
+        }
+
+        .google-card {
+            background-color: var(--google-white);
+            border-radius: 8px;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+            transition: box-shadow 0.2s ease;
+        }
+
+        .google-card:hover {
+            box-shadow: 0 1px 3px 0 rgba(60,64,67,0.302), 0 4px 8px 3px rgba(60,64,67,0.149);
+        }
+
+        .google-btn {
+            background-color: var(--google-primary);
+            color: white;
+            border-radius: 4px;
+            font-weight: 500;
+            padding: 10px 24px;
+            text-transform: none;
+            letter-spacing: normal;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+
+        .google-btn:hover {
+            background-color: #3367d6;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+
+        .google-btn:disabled {
+            background-color: rgba(66, 133, 244, 0.38);
+            color: rgba(255, 255, 255, 0.38);
+        }
+
+        .google-chip {
+            display: inline-flex;
+            align-items: center;
+            background-color: #e8f0fe;
+            color: var(--google-primary);
+            border-radius: 16px;
+            padding: 4px 12px;
+            font-size: 14px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        .google-chip .material-icons {
+            font-size: 16px;
+            margin-right: 4px;
+        }
+
+        .google-input {
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            padding: 12px 16px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+
+        .google-input:focus {
+            outline: none;
+            border-color: var(--google-primary);
+            border-width: 2px;
+        }
+
+        .google-tab {
+            padding: 12px 24px;
+            color: var(--google-gray);
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .google-tab.active {
+            color: var(--google-primary);
+            border-bottom-color: var(--google-primary);
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(66, 133, 244, 0.2);
+            border-top-color: var(--google-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .output-section {
+            border-left: 4px solid var(--google-primary);
+            padding-left: 16px;
+            margin-bottom: 24px;
+        }
+
+        .output-section h3 {
+            font-weight: 500;
+            color: var(--google-primary);
+            margin-bottom: 8px;
+        }
+
+        .output-section pre {
+            white-space: pre-wrap;
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.5;
+            background-color: var(--google-light-gray);
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        .video-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 4px;
+            background-color: var(--google-light-gray);
+        }
+
+        .video-item .material-icons {
+            color: var(--google-red);
+            margin-right: 12px;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body class="py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-8">
+            <div class="flex items-center">
+                <button onclick="goBackToIndex()" class="flex items-center px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors mr-4">
+                    <span class="material-icons mr-1" style="font-size: 18px;">arrow_back</span>
+                    Back to Dashboard
+                </button>
+                <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-green-500 flex items-center justify-center mr-3">
+                    <span class="text-white font-medium text-lg">AI</span>
+                </div>
+                <h1 class="text-2xl font-medium text-gray-800">AI Lesson Planner</h1>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="google-chip">
+                    <span class="material-icons">school</span>
+                    <span>Education</span>
+                </span>
+                <span class="google-chip">
+                    <span class="material-icons">lightbulb</span>
+                    <span>AI-Powered</span>
+                </span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Input Section -->
+            <div class="lg:col-span-1">
+                <div class="google-card p-6 h-full">
+                    <h2 class="text-xl font-medium mb-6 flex items-center">
+                        <span class="material-icons mr-2 text-blue-500">create</span>
+                        Lesson Details
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Lesson Topic</label>
+                            <input type="text" id="lessonTopic" class="google-input w-full" placeholder="e.g., Photosynthesis, Fractions">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Grade Level</label>
+                            <input type="text" id="gradeLevel" class="google-input w-full" placeholder="e.g., 3rd Grade, High School">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Subject Area</label>
+                            <input type="text" id="subjectArea" class="google-input w-full" placeholder="e.g., Science, Math, History">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Lesson Duration (minutes)</label>
+                            <input type="number" id="lessonDuration" class="google-input w-full" placeholder="45">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Specific Requirements</label>
+                            <textarea id="specificRequirements" rows="3" class="google-input w-full" placeholder="e.g., Include hands-on activity, support for ELL students..."></textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Preferred Date</label>
+                                <input type="date" id="preferredDate" class="google-input w-full">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Preferred Time</label>
+                                <input type="time" id="preferredTime" class="google-input w-full">
+                            </div>
+                        </div>
+                        
+                        <button id="generateBtn" class="google-btn w-full mt-4 flex items-center justify-center">
+                            <span class="material-icons mr-2">auto_awesome</span>
+                            Generate Lesson Plan
+                        </button>
+                        
+                        <div id="loadingIndicator" class="hidden flex items-center justify-center py-4">
+                            <div class="spinner mr-2"></div>
+                            <span class="text-gray-600">Generating your lesson plan...</span>
+                        </div>
+                        
+                        <div id="messageBox" class="hidden p-3 rounded text-sm"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Output Section -->
+            <div class="lg:col-span-2">
+                <div id="outputSections" class="hidden">
+                    <div class="google-card p-6 mb-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-medium flex items-center">
+                                <span class="material-icons mr-2 text-green-500">description</span>
+                                Generated Lesson Plan
+                            </h2>
+                            <button id="copyBtn" class="google-btn flex items-center" style="background-color: var(--google-green);">
+                                <span class="material-icons mr-1">content_copy</span>
+                                Copy
+                            </button>
+                        </div>
+                        
+                        <div id="lessonPlanContent" class="space-y-6">
+                            <!-- Lesson plan content will be inserted here -->
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Video Suggestions -->
+                        <div class="google-card p-6">
+                            <h3 class="text-lg font-medium mb-4 flex items-center">
+                                <span class="material-icons mr-2 text-red-500">ondemand_video</span>
+                                Video Suggestions
+                            </h3>
+                            <div id="videoSuggestionsContent" class="space-y-3">
+                                <!-- Video suggestions will be inserted here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Activity Script -->
+                        <div class="google-card p-6">
+                            <h3 class="text-lg font-medium mb-4 flex items-center">
+                                <span class="material-icons mr-2 text-yellow-500">directions_run</span>
+                                Activity Script
+                            </h3>
+                            <div id="activityScriptContent" class="output-section">
+                                <!-- Activity script will be inserted here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Scheduling -->
+                        <div class="google-card p-6">
+                            <h3 class="text-lg font-medium mb-4 flex items-center">
+                                <span class="material-icons mr-2 text-blue-500">schedule</span>
+                                Scheduling Suggestions
+                            </h3>
+                            <div id="schedulingContent" class="output-section">
+                                <!-- Scheduling content will be inserted here -->
+                            </div>
+                        </div>
+                        
+                        <!-- AI Process -->
+                        <div class="google-card p-6 md:col-span-2">
+                            <h3 class="text-lg font-medium mb-4 flex items-center">
+                                <span class="material-icons mr-2 text-purple-500">psychology</span>
+                                How the AI Planned This Lesson
+                            </h3>
+                            <div id="agentProcessContent" class="output-section">
+                                <!-- AI process explanation will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Empty State -->
+                <div id="emptyState" class="google-card p-12 flex flex-col items-center justify-center text-center">
+                    <div class="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-6">
+                        <span class="material-icons text-blue-500 text-4xl">auto_awesome</span>
+                    </div>
+                    <h3 class="text-xl font-medium text-gray-800 mb-2">Generate Your First Lesson Plan</h3>
+                    <p class="text-gray-600 max-w-md mb-6">
+                        Fill in the lesson details on the left and click "Generate Lesson Plan" to get started. Our AI will create a comprehensive, standards-aligned lesson plan tailored to your needs.
+                    </p>
+                    <div class="flex space-x-2">
+                        <span class="google-chip">
+                            <span class="material-icons">check</span>
+                            <span>Standards-Aligned</span>
+                        </span>
+                        <span class="google-chip">
+                            <span class="material-icons">diversity</span>
+                            <span>Differentiated</span>
+                        </span>
+                        <span class="google-chip">
+                            <span class="material-icons">bolt</span>
+                            <span>Fast</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // IMPORTANT: Replace with your actual API key. In a real application,
+        // this should be handled securely (e.g., via a backend).
+        // For Canvas environment, __app_id, __firebase_config, __initial_auth_token are provided globally.
+        // The API key for Gemini is automatically handled by the Canvas runtime if left empty.
+        const API_KEY = "AIzaSyDY7MB-brcUnm1eKTa0qqVJCMbNJ7SVgi0";
+        const MODEL = "gemini-1.5-flash"; // User specified this model
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+
+        // Get DOM elements
+        const lessonTopicInput = document.getElementById('lessonTopic');
+        const gradeLevelInput = document.getElementById('gradeLevel');
+        const subjectAreaInput = document.getElementById('subjectArea');
+        const lessonDurationInput = document.getElementById('lessonDuration');
+        const specificRequirementsTextarea = document.getElementById('specificRequirements');
+        const preferredDateInput = document.getElementById('preferredDate');
+        const preferredTimeInput = document.getElementById('preferredTime');
+        const generateBtn = document.getElementById('generateBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const messageBox = document.getElementById('messageBox');
+        const outputSections = document.getElementById('outputSections');
+        const emptyState = document.getElementById('emptyState');
+        const lessonPlanContent = document.getElementById('lessonPlanContent');
+        const copyBtn = document.getElementById('copyBtn');
+        const videoSuggestionsContent = document.getElementById('videoSuggestionsContent');
+        const activityScriptContent = document.getElementById('activityScriptContent');
+        const schedulingContent = document.getElementById('schedulingContent');
+        const agentProcessContent = document.getElementById('agentProcessContent');
+
+        // Function to display messages (errors, success)
+        function showMessage(message, type = 'error') {
+            messageBox.textContent = message;
+            messageBox.className = `p-3 rounded text-sm ${type === 'error' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`;
+            messageBox.classList.remove('hidden');
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Function to hide messages
+        function hideMessage() {
+            messageBox.classList.add('hidden');
+        }
+
+        // Function to call the Gemini API
+        async function callGemini(prompt, responseSchema = null) {
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+            const payload = { contents: chatHistory };
+
+            // If a schema is provided, add it to the generationConfig
+            if (responseSchema) {
+                payload.generationConfig = {
+                    responseMimeType: "application/json",
+                    responseSchema: responseSchema
+                };
+            }
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`API Error: ${response.status} - ${errorData.error.message || 'Unknown error'}`);
+                }
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    if (responseSchema) {
+                        return JSON.parse(text); // Parse JSON if a schema was expected
+                    }
+                    return text;
+                } else {
+                    throw new Error("No content found in API response.");
+                }
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                throw error; // Re-throw to be caught by the calling function
+            }
+        }
+
+        // Function to format the lesson plan for display
+        function formatLessonPlan(plan) {
+            let html = `
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-800 mb-2">${plan.lesson_title}</h3>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="px-2 py-1 bg-blue-50 text-blue-600 rounded-full text-xs">${plan.grade_level}</span>
+                        <span class="px-2 py-1 bg-green-50 text-green-600 rounded-full text-xs">${plan.subject}</span>
+                        <span class="px-2 py-1 bg-purple-50 text-purple-600 rounded-full text-xs">${plan.duration_minutes} minutes</span>
+                    </div>
+                </div>
+                
+                <div class="output-section mb-6">
+                    <h3>Learning Objectives</h3>
+                    <ul class="list-disc pl-5 space-y-1">
+                        ${plan.learning_objectives.map(obj => `<li>${obj}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="output-section mb-6">
+                    <h3>Materials Needed</h3>
+                    <ul class="list-disc pl-5 space-y-1">
+                        ${plan.materials.map(mat => `<li>${mat}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="output-section mb-6">
+                    <h3>Lesson Flow</h3>
+                    <div class="space-y-4">
+                        ${plan.lesson_flow.map(flow => `
+                            <div>
+                                <h4 class="font-medium text-gray-800">${flow.stage}</h4>
+                                <p class="text-gray-700">${flow.activity}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="output-section">
+                        <h3>Assessment Methods</h3>
+                        <ul class="list-disc pl-5 space-y-1">
+                            ${plan.assessment_methods.map(assess => `<li>${assess}</li>`).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="output-section">
+                        <h3>Key Vocabulary</h3>
+                        <p>${plan.key_vocabulary}</p>
+                    </div>
+                </div>
+                
+                <div class="output-section mb-6">
+                    <h3>Curriculum Standards</h3>
+                    <ul class="list-disc pl-5 space-y-1">
+                        ${plan.curriculum_standards.map(standard => `<li>${standard}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="output-section">
+                        <h3>Support Strategies</h3>
+                        <p>${plan.differentiation_strategies.support}</p>
+                    </div>
+                    
+                    <div class="output-section">
+                        <h3>Challenge Strategies</h3>
+                        <p>${plan.differentiation_strategies.challenge}</p>
+                    </div>
+                </div>
+                
+                <div class="output-section">
+                    <h3>Introduction Hook</h3>
+                    <p>${plan.introduction_hook}</p>
+                </div>
+                
+                <div class="output-section">
+                    <h3>Conclusion Summary</h3>
+                    <p>${plan.conclusion_summary}</p>
+                </div>
+            `;
+            
+            return html;
+        }
+
+        // Main function to generate the lesson plan with agentic steps
+        async function generateLessonPlan() {
+            hideMessage();
+            outputSections.classList.add('hidden');
+            emptyState.classList.add('hidden');
+            loadingIndicator.classList.remove('hidden');
+            generateBtn.disabled = true;
+
+            const topic = lessonTopicInput.value.trim();
+            const grade = gradeLevelInput.value.trim();
+            const subject = subjectAreaInput.value.trim();
+            const duration = lessonDurationInput.value.trim();
+            const requirements = specificRequirementsTextarea.value.trim();
+            const preferredDate = preferredDateInput.value; // YYYY-MM-DD
+            const preferredTime = preferredTimeInput.value; // HH:MM
+
+            if (!topic || !grade || !subject || !duration) {
+                showMessage("Please fill in all required fields: Topic, Grade Level, Subject Area, and Duration.", 'error');
+                loadingIndicator.classList.add('hidden');
+                generateBtn.disabled = false;
+                return;
+            }
+
+            let fullLessonPlan = {};
+            let agentProcessExplanation = "";
+            let interactiveActivityScript = "";
+            let schedulingSuggestion = "";
+
+            try {
+                // Agentic Step 1: Initial Plan Generation (Core Planner Agent)
+                const initialPlanPrompt = `
+                As an expert lesson planner, your first task is to create a foundational lesson plan.
+                Based on the following details, generate a comprehensive lesson plan in JSON format.
+
+                Topic: "${topic}"
+                Grade Level: "${grade}"
+                Subject Area: "${subject}"
+                Duration: "${duration} minutes"
+                Specific Requirements: "${requirements || 'None provided. Generate a standard plan.'}"
+
+                The JSON should strictly adhere to the following structure and include rich, detailed content for each field:
+                {
+                    "lesson_title": "A concise and engaging title for the lesson.",
+                    "subject": "The academic subject (e.g., Science, Math, History).",
+                    "grade_level": "The target grade level (e.g., 5th Grade).",
+                    "duration_minutes": "Estimated duration in minutes (e.g., 60).",
+                    "learning_objectives": [
+                        "A list of 3-5 clear, measurable (SMART) learning objectives for students."
+                    ],
+                    "materials": [
+                        "A list of all necessary materials for the lesson."
+                    ],
+                    "lesson_flow": [
+                        {
+                            "stage": "Engagement (e.g., 5-10 min)",
+                            "activity": "A detailed description of the activity for this stage, including teacher and student actions. Identify one activity here that could be expanded into a detailed script later if it's hands-on or interactive."
+                        },
+                        {
+                            "stage": "Exploration (e.g., 15-20 min)",
+                            "activity": "A detailed description of the activity for this stage."
+                        },
+                        {
+                            "stage": "Explanation (e.g., 10-15 min)",
+                            "activity": "A detailed description of the activity for this stage."
+                        },
+                        {
+                            "stage": "Elaboration (e.g., 10-15 min)",
+                            "activity": "A detailed description of the activity for this stage."
+                        },
+                        {
+                            "stage": "Evaluation (e.g., 5-10 min)",
+                            "activity": "A detailed description of the activity for this stage."
+                        }
+                    ],
+                    "assessment_methods": [
+                        "Methods to assess student learning (e.g., informal observation, quiz, project)."
+                    ],
+                    "key_vocabulary": [
+                        "Important terms students will learn."
+                    ],
+                    "introduction_hook": "A captivating activity or question to start the lesson.",
+                    "conclusion_summary": "A brief summary or wrap-up activity for the lesson."
+                }
+                Ensure all array fields have at least one item and objects are fully populated.
+                Prioritize including at least one hands-on or interactive activity in the 'lesson_flow' that can be expanded into a script.
+                `;
+
+                const initialPlanSchema = {
+                    type: "OBJECT",
+                    properties: {
+                        lesson_title: { type: "STRING" },
+                        subject: { type: "STRING" },
+                        grade_level: { type: "STRING" },
+                        duration_minutes: { type: "NUMBER" },
+                        learning_objectives: { type: "ARRAY", items: { type: "STRING" } },
+                        materials: { type: "ARRAY", items: { type: "STRING" } },
+                        lesson_flow: {
+                            type: "ARRAY",
+                            items: {
+                                type: "OBJECT",
+                                properties: {
+                                    stage: { type: "STRING" },
+                                    activity: { type: "STRING" }
+                                }
+                            }
+                        },
+                        assessment_methods: { type: "ARRAY", items: { type: "STRING" } },
+                        key_vocabulary: { type: "STRING" },
+                        introduction_hook: { type: "STRING" },
+                        conclusion_summary: { type: "STRING" }
+                    },
+                    required: ["lesson_title", "subject", "grade_level", "duration_minutes", "learning_objectives", "materials", "lesson_flow", "assessment_methods", "key_vocabulary", "introduction_hook", "conclusion_summary"]
+                };
+
+                fullLessonPlan = await callGemini(initialPlanPrompt, initialPlanSchema);
+                console.log("Step 1 (Initial Plan) completed:", fullLessonPlan);
+
+                // Agentic Step 2: Standards & Differentiation Enhancement (Refinement Agent)
+                const refinementPrompt = `
+                You have an initial lesson plan. Your next task is to enhance it by integrating relevant curriculum standards and detailed differentiation strategies.
+                Analyze the provided lesson plan for Topic: "${topic}", Grade Level: "${grade}", and Subject: "${subject}".
+
+                Lesson Plan to Enhance:
+                ${JSON.stringify(fullLessonPlan, null, 2)}
+
+                Output the *updated* lesson plan in JSON format. Add the following new keys:
+                - curriculum_standards (array of strings): Include 2-3 specific, relevant curriculum standards (e.g., Common Core, national, or general educational standards) for the topic and grade.
+                - differentiation_strategies (object): Provide detailed strategies for 'support' (struggling learners, ELL) and 'challenge' (advanced learners). Each should be a descriptive string.
+                `;
+
+                const refinementSchema = {
+                    type: "OBJECT",
+                    properties: {
+                        lesson_title: { type: "STRING" },
+                        subject: { type: "STRING" },
+                        grade_level: { type: "STRING" },
+                        duration_minutes: { type: "NUMBER" },
+                        learning_objectives: { type: "ARRAY", items: { type: "STRING" } },
+                        materials: { type: "ARRAY", items: { type: "STRING" } },
+                        lesson_flow: {
+                            type: "ARRAY",
+                            items: {
+                                type: "OBJECT",
+                                properties: {
+                                    stage: { type: "STRING" },
+                                    activity: { type: "STRING" }
+                                }
+                            }
+                        },
+                        assessment_methods: { type: "ARRAY", items: { type: "STRING" } },
+                        key_vocabulary: { type: "STRING" },
+                        introduction_hook: { type: "STRING" },
+                        conclusion_summary: { type: "STRING" },
+                        curriculum_standards: { type: "ARRAY", items: { type: "STRING" } },
+                        differentiation_strategies: {
+                            type: "OBJECT",
+                            properties: {
+                                support: { type: "STRING" },
+                                challenge: { type: "STRING" }
+                            }
+                        }
+                    },
+                    required: ["lesson_title", "subject", "grade_level", "duration_minutes", "learning_objectives", "materials", "lesson_flow", "assessment_methods", "key_vocabulary", "introduction_hook", "conclusion_summary", "curriculum_standards", "differentiation_strategies"]
+                };
+
+                fullLessonPlan = await callGemini(refinementPrompt, refinementSchema);
+                console.log("Step 2 (Refinement) completed:", fullLessonPlan);
+
+                // Agentic Step 3: Resource Recommendation (Resource Agent - now includes general resources)
+                const resourcePrompt = `
+                Your task is to suggest general resources and specific video recommendations for the following lesson plan.
+                Analyze the lesson plan for Topic: "${topic}", Grade Level: "${grade}", and Subject: "${subject}".
+
+                Lesson Plan:
+                ${JSON.stringify(fullLessonPlan, null, 2)}
+
+                Output the *updated* lesson plan in JSON format. Add the following new keys:
+                - general_resource_recommendations (array of strings): Suggest 3-5 general types of resources (e.g., "Interactive simulations", "Online articles", "Worksheets").
+                - video_suggestions (array of strings): Suggest 2-3 specific video titles or topics that would be highly beneficial for this lesson, suitable for the grade level.
+                `;
+
+                const resourceSchema = {
+                    type: "OBJECT",
+                    properties: {
+                        lesson_title: { type: "STRING" },
+                        subject: { type: "STRING" },
+                        grade_level: { type: "STRING" },
+                        duration_minutes: { type: "NUMBER" },
+                        learning_objectives: { type: "ARRAY", items: { type: "STRING" } },
+                        materials: { type: "ARRAY", items: { type: "STRING" } },
+                        lesson_flow: {
+                            type: "ARRAY",
+                            items: {
+                                type: "OBJECT",
+                                properties: {
+                                    stage: { type: "STRING" },
+                                    activity: { type: "STRING" }
+                                }
+                            }
+                        },
+                        assessment_methods: { type: "ARRAY", items: { type: "STRING" } },
+                        key_vocabulary: { type: "STRING" },
+                        introduction_hook: { type: "STRING" },
+                        conclusion_summary: { type: "STRING" },
+                        curriculum_standards: { type: "ARRAY", items: { type: "STRING" } },
+                        differentiation_strategies: {
+                            type: "OBJECT",
+                            properties: {
+                                support: { type: "STRING" },
+                                challenge: { type: "STRING" }
+                            }
+                        },
+                        general_resource_recommendations: { type: "ARRAY", items: { type: "STRING" } },
+                        video_suggestions: { type: "ARRAY", items: { type: "STRING" } }
+                    },
+                    required: ["lesson_title", "subject", "grade_level", "duration_minutes", "learning_objectives", "materials", "lesson_flow", "assessment_methods", "key_vocabulary", "introduction_hook", "conclusion_summary", "curriculum_standards", "differentiation_strategies", "general_resource_recommendations", "video_suggestions"]
+                };
+
+                fullLessonPlan = await callGemini(resourcePrompt, resourceSchema);
+                console.log("Step 3 (Resource & Video) completed:", fullLessonPlan);
+
+                // Agentic Step 4: Interactive Activity Script Generation (Activity Agent)
+                // Identify a suitable activity from lesson_flow to generate a script for
+                let activityToScript = null;
+                if (fullLessonPlan.lesson_flow && Array.isArray(fullLessonPlan.lesson_flow) && fullLessonPlan.lesson_flow.length > 0) {
+                    activityToScript = fullLessonPlan.lesson_flow.find(
+                        flow => flow.activity && (
+                            flow.activity.toLowerCase().includes('hands-on') ||
+                            flow.activity.toLowerCase().includes('interactive') ||
+                            flow.activity.toLowerCase().includes('experiment') ||
+                            flow.activity.toLowerCase().includes('game') ||
+                            flow.activity.toLowerCase().includes('group activity')
+                        )
+                    );
+                }
+
+                if (activityToScript && activityToScript.activity) {
+                    const activityScriptPrompt = `
+                    Generate a detailed, step-by-step script for the following interactive or hands-on activity from a lesson plan.
+                    Focus on clear instructions for both the teacher and students, materials needed, and expected outcomes.
+                    Activity Description: "${activityToScript.activity}"
+                    Lesson Topic: "${topic}"
+                    Grade Level: "${grade}"
+                    Subject: "${subject}"
+
+                    Output the script as plain text, formatted with clear headings and bullet points.
+                    `;
+                    interactiveActivityScript = await callGemini(activityScriptPrompt);
+                    console.log("Step 4 (Activity Script) completed.");
+                } else {
+                    interactiveActivityScript = "No suitable interactive or hands-on activity found in the lesson flow to generate a detailed script for. Please ensure your lesson plan includes a clearly described hands-on, interactive, experiment, or game activity.";
+                    console.log("Step 4 (Activity Script) skipped: No suitable activity found.");
+                }
+
+                // Agentic Step 5: Scheduling Suggestion (Scheduler Agent)
+                const schedulingPrompt = `
+                Given the lesson plan details and user preferences, suggest optimal scheduling times.
+                Lesson Topic: "${topic}"
+                Grade Level: "${grade}"
+                Subject: "${subject}"
+                Lesson Duration: ${fullLessonPlan.duration_minutes} minutes
+                Preferred Date: "${preferredDate || 'Not specified'}"
+                Preferred Time: "${preferredTime || 'Not specified'}"
+
+                Consider typical school schedules (e.g., morning for younger grades, flexible for high school, avoiding lunch/recess conflicts).
+                Suggest 2-3 optimal time slots or days, explaining the reasoning for each.
+                If a preferred date/time is given, try to incorporate it or explain why it might not be optimal.
+                Output the suggestions as a concise, easy-to-read text paragraph.
+                `;
+                schedulingSuggestion = await callGemini(schedulingPrompt);
+                console.log("Step 5 (Scheduling Suggestion) completed.");
+
+                // Agentic Step 6: Generate Agent Process Explanation
+                const processExplanationPrompt = `
+                You have just completed generating a comprehensive lesson plan through a multi-step, agentic process.
+                Explain to a teacher how you, as an AI agent, approached this task.
+                Describe the key stages you went through to create the complete lesson plan, including:
+                1.  **Initial Plan Generation**: The first step involved creating the core lesson plan structure, including objectives, materials, and a basic lesson flow, based on the topic, grade, and any specific requirements.
+                2.  **Standards and Differentiation Enhancement**: Next, the plan was refined by integrating relevant educational curriculum standards and detailed strategies to differentiate instruction for diverse learners (e.g., providing support for struggling students and challenges for advanced ones).
+                3.  **Resource and Video Recommendation**: Following that, relevant general resources and specific video suggestions were added to enrich the lesson content.
+                4.  **Interactive Activity Script Generation**: A detailed, step-by-step script was then generated for a key hands-on or interactive activity identified within the lesson flow, providing practical guidance for implementation.
+                5.  **Scheduling Suggestion**: Finally, optimal scheduling times were suggested, taking into account the lesson's duration and any preferred dates/times provided by the teacher, along with general school scheduling considerations.
+
+                Keep the explanation concise, clear, and easy for a teacher to understand, highlighting how breaking down the problem into these distinct "agentic" steps allowed for a more thorough and specialized output.
+                `;
+                agentProcessExplanation = await callGemini(processExplanationPrompt);
+                console.log("Step 6 (Agent Process Explanation) completed.");
+
+                // Display the final lesson plan and other outputs
+                lessonPlanContent.innerHTML = formatLessonPlan(fullLessonPlan);
+
+                // Display video suggestions
+                videoSuggestionsContent.innerHTML = '';
+                if (fullLessonPlan.video_suggestions && fullLessonPlan.video_suggestions.length > 0) {
+                    fullLessonPlan.video_suggestions.forEach(video => {
+                        const div = document.createElement('div');
+                        div.className = 'video-item';
+                        div.innerHTML = `
+                            <span class="material-icons">play_circle</span>
+                            <div>
+                                <p class="font-medium">${video}</p>
+                                <p class="text-sm text-gray-600">Suggested video resource</p>
+                            </div>
+                        `;
+                        videoSuggestionsContent.appendChild(div);
+                    });
+                } else {
+                    videoSuggestionsContent.innerHTML = '<p class="text-gray-600">No specific video suggestions at this time.</p>';
+                }
+
+                // Display interactive activity script
+                activityScriptContent.innerHTML = `
+                    <h3>${activityToScript ? activityToScript.stage : 'Interactive Activity'}</h3>
+                    <pre>${interactiveActivityScript}</pre>
+                `;
+
+                // Display scheduling suggestions
+                schedulingContent.innerHTML = `
+                    <h3>Optimal Scheduling</h3>
+                    <p>${schedulingSuggestion}</p>
+                `;
+
+                // Display agent process explanation
+                agentProcessContent.innerHTML = `
+                    <h3>AI Planning Process</h3>
+                    <p>${agentProcessExplanation}</p>
+                `;
+
+                outputSections.classList.remove('hidden');
+                showMessage("Lesson plan generated successfully!", 'success');
+
+            } catch (error) {
+                console.error("Error generating lesson plan:", error);
+                showMessage(`Failed to generate lesson plan: ${error.message}. Please try again.`, 'error');
+                emptyState.classList.remove('hidden');
+            } finally {
+                loadingIndicator.classList.add('hidden');
+                generateBtn.disabled = false;
+            }
+        }
+
+        // Event Listeners
+        generateBtn.addEventListener('click', generateLessonPlan);
+
+        copyBtn.addEventListener('click', () => {
+            const textToCopy = lessonPlanContent.textContent;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            try {
+                document.execCommand('copy');
+                showMessage('Lesson plan copied to clipboard!', 'success');
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                showMessage('Failed to copy lesson plan to clipboard.', 'error');
+            } finally {
+                document.body.removeChild(tempTextArea);
+            }
+        });
+
+        // Initial state on page load
+        window.onload = () => {
+            hideMessage();
+            outputSections.classList.add('hidden');
+            loadingIndicator.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            preferredDateInput.value = today;
+        };
+
+        // Back navigation function - defined globally so onclick can access it
+        function goBackToIndex() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
